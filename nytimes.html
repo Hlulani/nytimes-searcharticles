@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Search articles using nytimes data</title>
+  </head>
+  <body>
+    <div>
+      <input type="text" name="search_articles" onchange="getArticles()" id="search"/>
+    </div>
+      <div id="articles">
+
+      </div>
+    <script>
+
+       async function getData(queryString) {
+        let url = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=uFvWRMw2KK16tt3qv0kAeMN6UnGgseqC';
+        url += `&q=${queryString}`
+        let data;
+
+          try {
+            const responses = await fetch(url); 
+            if(responses.ok){
+                    data = await responses.json();
+                } else {
+                    Promise.reject(responses);
+                }
+          } catch(e) {
+            console.log("Error while fetching the data", e)
+            Promise.reject(e)
+          }
+
+          return data
+        }
+       
+         async function getArticlesData(queryParam) {
+          const articlesMarkup = document.getElementById("articles")
+          articlesMarkup.innerHTML =  ""
+           const data = await getData(queryParam);
+
+            data.response.docs.forEach((item, index) => {
+            const {headline, lead_paragraph} = item 
+             console.log("headline", headline, lead_paragraph)  
+             const article =  document.createElement('div')
+             article.id = "news_article" + index 
+
+             const article_heading = document.createElement('h2')
+             article_heading.id = "news_header" + index
+
+             const article_paragraph = document.createElement('p')
+             article_paragraph.id =  "news_paragraph" + index
+
+             article_heading.innerText = headline.main
+             article_paragraph.innerText = lead_paragraph
+
+
+            article.appendChild(article_heading)
+            article.appendChild(article_paragraph)
+
+           const articles = document.getElementById("articles")
+           articles.appendChild(article)
+        })
+
+        }
+
+        function getArticles() {
+
+          const searchValue = document.getElementById('search').value;
+          getArticlesData(searchValue);
+
+        }
+    </script>
+  </body>
+
+</html>
